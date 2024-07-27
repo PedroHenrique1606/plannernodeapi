@@ -7,6 +7,8 @@ import nodemailer from 'nodemailer';
 import { z } from 'zod';
 import { getMailClient } from "../lib/mail";
 import { prisma } from "../lib/prisma";
+import { ClientError } from "../erros/client-error";
+import { env } from "../env";
 
 dayjs.extend(localizedFormat);
 dayjs.locale('pt-br')
@@ -15,7 +17,7 @@ export async function createTrip(app: FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().post('/trips', {
         schema: {
             body: z.object({
-                destination: z.string().min(4),
+                destination: z.string({ required_error: 'Destination is required' }).min(4),
                 starts_at: z.coerce.date(),
                 ends_at: z.coerce.date(),
                 owner_name: z.string(),
@@ -27,11 +29,11 @@ export async function createTrip(app: FastifyInstance) {
         const { destination, ends_at, starts_at, owner_email, owner_name, emails_to_invite } = request.body
 
         if (dayjs(starts_at).isBefore(new Date())) {
-            throw new Error('Invalid trip start date')
+            throw new ClientError('Invalid trip start date')
         }
 
         if (dayjs(ends_at).isBefore(starts_at)) {
-            throw new Error('Invalid trip end date')
+            throw new ClientError('Invalid trip end date')
         }
 
 
@@ -61,7 +63,7 @@ export async function createTrip(app: FastifyInstance) {
         const formattedStartDate = dayjs(starts_at).format('LL')
         const formattedEndDate = dayjs(starts_at).format('LL')
 
-        const confirmationLink = `http://localhost:3333/trips/${trip.id}/confirm`
+        const confirmationLink = `${env.API_BASE_URL}/trips/${trip.id}/confirm`
 
         const mail = await getMailClient()
 

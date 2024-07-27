@@ -5,26 +5,27 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from 'zod';
 import { prisma } from "../lib/prisma";
-import { access } from "fs";
 import { ClientError } from "../erros/client-error";
 
 dayjs.extend(localizedFormat);
 dayjs.locale('pt-br')
 
-export async function createActivity(app: FastifyInstance) {
-    app.withTypeProvider<ZodTypeProvider>().post('/trips/:tripId/activities', {
+export async function updateTrip(app: FastifyInstance) {
+    app.withTypeProvider<ZodTypeProvider>().put('/trips/:tripId', {
         schema: {
             params: z.object({
                 tripId: z.string().uuid()
             }),
             body: z.object({
-                title: z.string().min(4),
-                occurs_at: z.coerce.date(),
+                destination: z.string().min(4),
+                starts_at: z.coerce.date(),
+                ends_at: z.coerce.date(),
             })
         }
     }, async (request) => {
-        const { tripId } = request.params
-        const { title, occurs_at } = request.body
+        const { destination, ends_at, starts_at } = request.body
+        const {tripId} = request.params
+
         const trip = await prisma.trip.findUnique({
             where: { id: tripId }
         })
@@ -33,21 +34,23 @@ export async function createActivity(app: FastifyInstance) {
             throw new ClientError('trip not found')
         }
 
-        if (dayjs(occurs_at).isBefore(trip.starts_at)) {
-            throw new ClientError('Invalid Actividy Date')
+        if (dayjs(starts_at).isBefore(new Date())) {
+            throw new ClientError('Invalid trip start date')
         }
 
-        if (dayjs(occurs_at).isAfter(trip.ends_at)) {
-            throw new ClientError('Invalid Actividy Date')
+        if (dayjs(ends_at).isBefore(starts_at)) {
+            throw new ClientError('Invalid trip end date')
         }
 
-        const activity = await prisma.activity.create({
+        await prisma.trip.update({
+            where: {id: tripId},
             data: {
-                title,
-                occurs_at,
-                trip_id: tripId,
+                destination,
+                starts_at,
+                ends_at
             }
         })
-        return { activityId: activity.id }
+
+        return { tripID: trip.id }
     })
 }
