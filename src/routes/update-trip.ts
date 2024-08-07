@@ -51,6 +51,6 @@ export async function updateTrip(app: FastifyInstance) {
             }
         })
 
-        return { tripID: trip.id }
+        return { tripId: trip.id }
     })
 }
