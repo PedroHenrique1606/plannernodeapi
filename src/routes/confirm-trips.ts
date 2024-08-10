@@ -37,7 +37,7 @@ export async function confirmTrip(app: FastifyInstance) {
         }
 
         if (trip.is_confirmed) {
-            return rep.redirect(`http://localhost:3000/trips/${tripId}`)
+            return rep.redirect(`http://localhost:5173/trips/${tripId}`)
         }
 
         await prisma.trip.update({

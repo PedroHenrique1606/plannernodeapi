@@ -35,7 +35,7 @@ Crie um arquivo .env na raiz do projeto e configure as variáveis de ambiente:
 DATABASE_URL="file:./dev.db"
 API_BASE_URL="http://localhost:3333"
 PORT=3333
-WEB_BASE_URL="http://localhost:3000"
+WEB_BASE_URL="http://localhost:5173"
 USER_EMAIL="seu-email@gmail.com"
 PASSWORD_MAIL="sua-senha-de-aplicativo"
 ```
