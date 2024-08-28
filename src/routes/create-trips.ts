@@ -116,7 +116,7 @@ export async function createTrip(app: FastifyInstance) {
                         <img src="cid:logo" style="width: 25%;" />
                     </div>
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 10px;">
-                        <h2 style="color: #444;">Você foi para uma viagem à <strong>${destination}</strong></h2>
+                        <h2 style="color: #444;">Confirme sua viagem à <strong>${destination}</strong></h2>
                         <p>Você foi convidado por ${owner_name} para uma viagem com destino à <strong>${destination}</strong> nas datas de
                             <strong>${formattedStartDate}</strong> até <strong>${formattedEndDate}</strong>.
                         </p>
