@@ -1,4 +1,5 @@
 import "dayjs/locale/pt-br";
+import localizedFormat from "dayjs/plugin/localizedFormat";
 import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import nodemailer from 'nodemailer';
@@ -76,7 +77,7 @@ export async function confirmTrip(app: FastifyInstance) {
                             </p>
                             <p></p>
                             <p>Caso você não saiba do que se trata esse e-mail, apenas o ignore.</p>
-                        </div>￼
+                        </div>
                     `.trim()
                 })
 
