@@ -3,11 +3,11 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import nodemailer from 'nodemailer';
 import { z } from 'zod';
-import { env } from "../env";
-import { ClientError } from "../erros/client-error";
 import { dayjs } from "../lib/dayjs";
 import { getMailClient } from "../lib/mail";
 import { prisma } from "../lib/prisma";
+import { ClientError } from "../erros/client-error";
+import { env } from "../env";
 
 export async function confirmTrip(app: FastifyInstance) {
     app.withTypeProvider<ZodTypeProvider>().get('/trips/:tripId/confirm', {
@@ -17,8 +17,7 @@ export async function confirmTrip(app: FastifyInstance) {
             })
         }
     }, async (request, rep) => {
-        const { tripId } = request.params;
-
+        const { tripId } = request.params
         const trip = await prisma.trip.findUnique({
             where: {
                 id: tripId,
@@ -30,29 +29,31 @@ export async function confirmTrip(app: FastifyInstance) {
                     }
                 }
             }
-        });
+        })
 
         if (!trip) {
-            throw new ClientError('Trip not found');
+            return new ClientError('trip not found')
         }
 
         if (trip.is_confirmed) {
-            return rep.redirect(`${env.WEB_BASE_URL}/trips/${tripId}`);
+            return rep.redirect(`https://plannerweb-five.vercel.app/trips/${tripId}`)
         }
 
         await prisma.trip.update({
             where: { id: tripId },
             data: { is_confirmed: true },
-        });
+        })
 
-        const formattedStartDate = dayjs(trip.starts_at).format('LL');
-        const formattedEndDate = dayjs(trip.ends_at).format('LL');
+        trip.participants
 
-        const mail = await getMailClient();
+        const formattedStartDate = dayjs(trip.starts_at).format('LL')
+        const formattedEndDate = dayjs(trip.starts_at).format('LL')
+
+        const mail = await getMailClient()
 
         await Promise.all(
             trip.participants.map(async (participant) => {
-                const confirmationLink = `${env.API_BASE_URL}/participants/${participant.id}/confirm`;
+                const confirmationLink = `${env.API_BASE_URL}/participants/${participant.id}/confirm`
 
                 const message = await mail.sendMail({
                     from: {
@@ -64,21 +65,26 @@ export async function confirmTrip(app: FastifyInstance) {
                     html: `
                         <div style="font-family: sans-serif; font-size: 16px; line-height: 1.6;">
                             <p>Você foi convidado(a) para participar de uma viagem para <strong>${trip.destination}</strong> nas datas de
-                                <strong>${formattedStartDate}</strong> até <strong>${formattedEndDate}</strong>.
+                                <strong>${formattedStartDate}</strong> até <strong>${formattedEndDate}</strong>
                             </p>
+                            <p>
+                            <p></p>
                             <p>Para confirmar sua presença na viagem, clique no link abaixo:</p>
                             <a href="${confirmationLink}">
                                 Confirmar Viagem
                             </a>
+                            </p>
+                            <p></p>
                             <p>Caso você não saiba do que se trata esse e-mail, apenas o ignore.</p>
-                        </div>
+                        </div>￼
                     `.trim()
-                });
+                })
 
-                console.log(nodemailer.getTestMessageUrl(message));
+                console.log(nodemailer.getTestMessageUrl(message))
+
             })
-        );
+        )
 
-        return rep.redirect(`${env.WEB_BASE_URL}/trips/${tripId}`);
-    });
+        return rep.redirect(`${env.WEB_BASE_URL}/trips/${tripId}`)
+    })
 }
