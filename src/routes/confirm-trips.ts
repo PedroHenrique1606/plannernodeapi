@@ -37,7 +37,7 @@ export async function confirmTrip(app: FastifyInstance) {
         }
 
         if (trip.is_confirmed) {
-            return rep.redirect(`https://plannerweb-five.vercel.app/trips/${tripId}`)
+            return rep.redirect(`${env.WEB_BASE_URL}/trips/${tripId}`)
         }
 
         await prisma.trip.update({
